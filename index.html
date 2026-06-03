@@ -675,19 +675,7 @@ code {
 .boss-editor { font-size: 10px; color: var(--ink3); margin-top: 2px; }
 .boss-opt.sel-j .boss-name { color: var(--jon); }
 .boss-opt.sel-d .boss-name { color: var(--des); }
-.ai-hint {
-  font-size: 10px; color: var(--ink3);
-  display: flex; align-items: center; gap: 4px;
-  margin-top: 5px;
 }
-.ai-loading {
-  display: none;
-  align-items: center; gap: 6px;
-  font-size: 11px; color: var(--ink3);
-  margin-top: 5px;
-}
-.ai-loading.show { display: flex; }
-.ai-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--jon-bar); animation: sdotpulse .7s infinite alternate; }
 .form-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1002,20 +990,12 @@ code {
 
     <div class="f-group">
       <label class="f-label" for="f-script">Script</label>
-      <textarea class="f-textarea" id="f-script" placeholder="Paste the WhatsApp script here…" oninput="onScriptType()"></textarea>
-      <div class="ai-loading" id="ai-loader">
-        <div class="ai-dot"></div>
-        Generating title from script…
-      </div>
-      <div class="ai-hint">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        Title auto-generates from script if you leave it blank
-      </div>
+      <textarea class="f-textarea" id="f-script" placeholder="Paste the WhatsApp script here…"></textarea>
     </div>
 
     <div class="f-group">
-      <label class="f-label" for="f-title">Title <span style="font-weight:400;text-transform:none;font-size:10px">— auto-filled if blank</span></label>
-      <input class="f-input" id="f-title" placeholder="Auto-generated from script…" />
+      <label class="f-label" for="f-title">Title</label>
+      <input class="f-input" id="f-title" placeholder="Type a short title…" />
     </div>
 
     <div class="f-group">
@@ -1024,7 +1004,7 @@ code {
     </div>
 
     <div class="f-group">
-      <span class="f-label">Content type <span style="font-weight:400;text-transform:none;font-size:10px">— auto-detected if not chosen</span></span>
+      <span class="f-label">Content type</span>
       <div class="urgency-grid">
         <div class="urgency-opt" id="opt-urgent" onclick="pickUrgency('urgent')">
           <span class="uicon">🔥</span>
@@ -1036,10 +1016,6 @@ code {
           <div class="uname">Evergreen</div>
           <div class="udesc">Always relevant</div>
         </div>
-      </div>
-      <div class="ai-hint" style="margin-top:6px">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        AI will classify the content type from the script if you skip this
       </div>
     </div>
 
@@ -1094,7 +1070,6 @@ let boss = null;
 let urgency = null;   // 'urgent' | 'evergreen' | null
 let currentId = null;
 let weekOffset = 0;
-let aiTimer = null;
 let videos   = JSON.parse(localStorage.getItem('reels_videos')   || '[]');
 let archived = JSON.parse(localStorage.getItem('reels_archived') || '[]');
 
@@ -1188,7 +1163,6 @@ function openAdd() {
   document.getElementById('opt-d').className = 'boss-opt';
   document.getElementById('opt-urgent').className   = 'urgency-opt';
   document.getElementById('opt-evergreen').className = 'urgency-opt';
-  document.getElementById('ai-loader').classList.remove('show');
   document.getElementById('btn-save').disabled = false;
   document.getElementById('add-modal').classList.add('open');
 }
@@ -1206,94 +1180,17 @@ function pickUrgency(u) {
   document.getElementById('opt-evergreen').className = 'urgency-opt' + (urgency === 'evergreen' ? ' sel-evergreen' : '');
 }
 
-function onScriptType() {
-  clearTimeout(aiTimer);
-  const script = document.getElementById('f-script').value.trim();
-  if (!script || document.getElementById('f-title').value.trim()) {
-    document.getElementById('ai-loader').classList.remove('show');
-    return;
-  }
-  document.getElementById('ai-loader').classList.add('show');
-  aiTimer = setTimeout(() => generateTitle(script), 1000);
-}
-
-async function generateTitle(script) {
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 80,
-        system: 'You generate short punchy titles for social media reels. Reply with ONLY the title — 3 to 7 words, no quotes, no punctuation at the end, nothing else at all.',
-        messages: [{ role: 'user', content: 'Write a title for this reel script:\n\n' + script.slice(0, 600) }]
-      })
-    });
-    const data = await res.json();
-    const title = (data.content?.[0]?.text || '').trim();
-    if (title && !document.getElementById('f-title').value.trim()) {
-      document.getElementById('f-title').value = title;
-    }
-  } catch (e) { /* silent */ }
-  document.getElementById('ai-loader').classList.remove('show');
-}
-
 async function saveVideo() {
-  if (!boss) { showToast('Please select Jonathan or Desmond'); return; }
-  let title    = document.getElementById('f-title').value.trim();
+  if (!boss)  { showToast('Please select Jonathan or Desmond'); return; }
+  if (!urgency) { showToast('Please select Urgent or Evergreen'); return; }
+  const title  = document.getElementById('f-title').value.trim();
   const script = document.getElementById('f-script').value.trim();
   const date   = document.getElementById('f-date').value;
-  if (!date) { showToast('Please pick a date'); return; }
+  if (!title)  { showToast('Please enter a title'); return; }
+  if (!date)   { showToast('Please pick a date'); return; }
 
   const btn = document.getElementById('btn-save');
   btn.disabled = true;
-  document.getElementById('ai-loader').classList.add('show');
-
-  // ── Two clean separate AI calls ──────────────────────────────────────────
-  async function aiCall(systemPrompt, userContent) {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 80,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userContent }]
-      })
-    });
-    const d = await res.json();
-    return (d.content?.[0]?.text || '').trim();
-  }
-
-  if (!title && script) {
-    try {
-      const raw = await aiCall(
-        'You generate short punchy titles for social media reels. Reply with ONLY the title — 3 to 7 words, no quotes, no punctuation at the end, nothing else at all.',
-        'Write a title for this reel script:\n\n' + script.slice(0, 600)
-      );
-      title = raw || '';
-    } catch (e) { title = ''; }
-  }
-
-  if (!urgency && script) {
-    try {
-      const raw = await aiCall(
-        'You classify social media content. Reply with ONLY one word: either urgent or evergreen. No other text.',
-        'Is this script time-sensitive (urgent) or always relevant (evergreen)?\n\n' + script.slice(0, 600)
-      );
-      urgency = raw.toLowerCase().includes('urgent') ? 'urgent' : 'evergreen';
-    } catch (e) { urgency = 'evergreen'; }
-  }
-
-  document.getElementById('ai-loader').classList.remove('show');
-  if (!title)   title   = script ? script.split(' ').slice(0, 6).join(' ') : 'Untitled reel';
-  if (!urgency) urgency = 'evergreen';
 
   const video = { boss, title, script, date, editor: EDITORS[boss], status: 'pending', urgency };
   const result = await apiPost({ action: 'add', video });
