@@ -4,754 +4,898 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Reels Tracker</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Desmond — Reels</title>
 <style>
-/* ── RESET ── */
+/* ─── SYSTEM FONT STACK (Apple DNA) ─── */
+:root {
+  --sf: -apple-system, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+
+  /* Apple palette */
+  --bg:        #F5F5F7;
+  --surface:   #FFFFFF;
+  --surface2:  #F5F5F7;
+  --line:      #D2D2D7;
+  --line-soft: #E8E8ED;
+  --ink:       #1D1D1F;
+  --ink2:      #6E6E73;
+  --ink3:      #AEAEB2;
+  --blue:      #0066CC;
+  --blue-soft: #EBF3FF;
+  --red:       #FF3B30;
+  --red-soft:  #FFF0EF;
+  --green:     #34C759;
+  --green-soft:#F0FBF3;
+  --amber:     #FF9500;
+  --amber-soft:#FFF6E8;
+
+  /* Status colors */
+  --pend-bg:  #FFF6E8; --pend-tx: #C47800;
+  --edit-bg:  #EBF3FF; --edit-tx: #0055AA;
+  --done-bg:  #F0FBF3; --done-tx: #1A7A35;
+
+  /* Urgency */
+  --urg-bg:   #FFF0EF; --urg-tx: #CC2200;
+  --eve-bg:   #F0FBF3; --eve-tx: #1A7A35;
+
+  --radius:    12px;
+  --radius-sm: 8px;
+  --radius-xs: 6px;
+}
+
+.dark {
+  --bg:        #000000;
+  --surface:   #1C1C1E;
+  --surface2:  #2C2C2E;
+  --line:      #38383A;
+  --line-soft: #2C2C2E;
+  --ink:       #F5F5F7;
+  --ink2:      #8E8E93;
+  --ink3:      #48484A;
+  --blue:      #0A84FF;
+  --blue-soft: #001D3D;
+  --red:       #FF453A;
+  --red-soft:  #3D0F0D;
+  --green:     #30D158;
+  --green-soft:#0D2E17;
+  --amber:     #FF9F0A;
+  --amber-soft:#2E1D00;
+  --pend-bg:  #2E1D00; --pend-tx: #FF9F0A;
+  --edit-bg:  #001D3D; --edit-tx: #0A84FF;
+  --done-bg:  #0D2E17; --done-tx: #30D158;
+  --urg-bg:   #3D0F0D; --urg-tx:  #FF6B63;
+  --eve-bg:   #0D2E17; --eve-tx:  #30D158;
+}
+
+/* ─── RESET ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 button, input, textarea, select { font-family: inherit; }
+html, body { height: 100%; }
 
-/* ── TOKENS ── */
-:root {
-  --bg: #F7F5F1;
-  --card: #FFFFFF;
-  --lift: #F0EDE8;
-  --edge: #E4E0D8;
-  --edge2: #CCC8BE;
-  --ink: #1C1A16;
-  --ink2: #5A5650;
-  --ink3: #9C9890;
-  --jon: #3B2FA0;
-  --jon-bg: #EEEAFF;
-  --jon-bar: #7B6EE8;
-  --des: #8B4500;
-  --des-bg: #FFF0E0;
-  --des-bar: #D4831E;
-  --pend-bg: #FFF3DC;  --pend-tx: #7A4800;
-  --edit-bg: #DCF0FF;  --edit-tx: #0A5A96;
-  --done-bg: #D8F2E4;  --done-tx: #0C6030;
-  --red: #C02020;
-  --radius: 14px;
-  --radius-sm: 9px;
-  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 3px 10px rgba(0,0,0,.06);
-  --shadow-modal: 0 -2px 8px rgba(0,0,0,.06), 0 -16px 48px rgba(0,0,0,.12);
-}
-.dark {
-  --bg: #131210;
-  --card: #1E1C19;
-  --lift: #262420;
-  --edge: #2E2C28;
-  --edge2: #3E3C38;
-  --ink: #F0EDE8;
-  --ink2: #A09C94;
-  --ink3: #5C5850;
-  --jon: #9D94F0;
-  --jon-bg: #1E1A48;
-  --jon-bar: #7B6EE8;
-  --des: #D4831E;
-  --des-bg: #2E1A04;
-  --des-bar: #D4831E;
-  --pend-bg: #3A2200;  --pend-tx: #D4A050;
-  --edit-bg: #042040;  --edit-tx: #60AADF;
-  --done-bg: #042812;  --done-tx: #40C870;
-}
-
-/* ── BASE ── */
-html, body {
-  height: 100%;
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  font-size: 14px;
+body {
+  font-family: var(--sf);
+  font-size: 15px;
+  line-height: 1.47;
   background: var(--bg);
   color: var(--ink);
   overflow: hidden;
-  transition: background .25s, color .25s;
+  -webkit-font-smoothing: antialiased;
+  transition: background .2s, color .2s;
 }
+
+/* ─── APP SHELL ─── */
 #app {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  max-width: 960px;
+  max-width: 800px;
   margin: 0 auto;
-  /* intentional outer shadow so it looks like a proper app panel on desktop */
-  box-shadow: 0 0 0 1px var(--edge), 0 4px 40px rgba(0,0,0,.08);
+  background: var(--bg);
 }
 
-/* ── HEADER ── */
-.hdr {
+/* ─── TOP BAR ─── */
+.topbar {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px 14px;
-  background: var(--card);
-  border-bottom: 1px solid var(--edge);
-  gap: 12px;
+  padding: 12px 20px 0;
+  background: var(--bg);
+  gap: 10px;
 }
-.logo { flex-shrink: 0; }
-.logo-title {
-  font-family: 'Lora', Georgia, serif;
-  font-style: italic;
-  font-size: 18px;
-  color: var(--ink);
-  letter-spacing: -.2px;
-  line-height: 1;
+.topbar-brand {
+  flex: 1;
+  min-width: 0;
 }
-.logo-sub {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 1.6px;
+.topbar-eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .6px;
   text-transform: uppercase;
   color: var(--ink3);
-  margin-top: 3px;
+  line-height: 1;
+  margin-bottom: 2px;
 }
-.hdr-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
+.topbar-name {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -.5px;
+  color: var(--ink);
+  line-height: 1;
 }
+.topbar-actions { display: flex; gap: 8px; align-items: center; }
+
+/* Sync pill */
 .sync-pill {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: var(--lift);
-  border: 1px solid var(--edge);
+  display: flex; align-items: center; gap: 5px;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
   border-radius: 20px;
   padding: 5px 10px;
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 500;
   color: var(--ink3);
-  letter-spacing: .3px;
   cursor: pointer;
+  letter-spacing: .1px;
   transition: background .15s;
   white-space: nowrap;
 }
-.sync-pill:hover { background: var(--edge); }
-.sdot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--ink3); flex-shrink: 0;
-  transition: background .3s;
-}
-.sdot.ok  { background: #3BBF6A; }
-.sdot.err { background: #E24B4A; }
-.sdot.spin { background: #5B9FEB; animation: sdotpulse .7s infinite alternate; }
-@keyframes sdotpulse { from { opacity: .3; } to { opacity: 1; } }
+.sync-pill:active { background: var(--surface2); }
+.sdot { width: 6px; height: 6px; border-radius: 50%; background: var(--ink3); flex-shrink: 0; transition: background .3s; }
+.sdot.ok  { background: var(--green); }
+.sdot.err { background: var(--red); }
+.sdot.spin { background: var(--blue); animation: blink .6s infinite alternate; }
+@keyframes blink { from { opacity: .3; } to { opacity: 1; } }
 
-.icon-btn {
-  background: none;
-  border: 1px solid var(--edge);
-  border-radius: var(--radius-sm);
-  width: 36px; height: 36px;
+/* Icon buttons */
+.ico {
+  width: 34px; height: 34px;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   color: var(--ink2);
-  font-size: 17px;
-  transition: background .15s;
   flex-shrink: 0;
+  transition: background .15s;
 }
-.icon-btn:hover, .icon-btn:active { background: var(--lift); }
+.ico:active { background: var(--surface2); }
+.ico svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Primary add button */
 .add-btn {
-  background: var(--ink);
+  display: flex; align-items: center; gap: 6px;
+  background: var(--blue);
+  border: none;
+  border-radius: 20px;
+  padding: 7px 16px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: -.1px;
+  transition: opacity .15s;
+  white-space: nowrap;
+}
+.add-btn:active { opacity: .8; }
+.add-btn svg { width: 14px; height: 14px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; }
+
+/* ─── SEGMENT CONTROL (Apple-style tabs) ─── */
+.seg-wrap {
+  flex-shrink: 0;
+  padding: 12px 20px 0;
+}
+.seg {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  padding: 3px;
+  gap: 2px;
+}
+.seg-btn {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink2);
+  background: none;
   border: none;
   border-radius: var(--radius-sm);
-  height: 36px;
-  padding: 0 16px;
-  color: var(--bg);
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: .3px;
-  display: flex; align-items: center; gap: 6px;
-  flex-shrink: 0;
-  transition: opacity .15s;
-}
-.add-btn:hover { opacity: .88; }
-.add-btn:active { opacity: .7; }
-.add-btn svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2.5; fill: none; flex-shrink: 0; }
-
-/* ── NAV TABS ── */
-.nav {
-  flex-shrink: 0;
-  display: flex;
-  background: var(--card);
-  border-bottom: 1px solid var(--edge);
-  padding: 0 20px;
-  gap: 0;
-  overflow-x: auto;
-  -ms-overflow-style: none; scrollbar-width: none;
-}
-.nav::-webkit-scrollbar { display: none; }
-.ntab {
-  padding: 11px 14px 10px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .4px;
-  text-transform: uppercase;
-  color: var(--ink3);
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  white-space: nowrap;
-  transition: color .15s, border-color .15s;
-}
-.ntab.on { color: var(--ink); border-bottom-color: var(--ink); }
-
-/* ── STAT BAR ── */
-.statbar {
-  flex-shrink: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  background: var(--card);
-  border-bottom: 1px solid var(--edge);
-  padding: 0 20px;
-}
-.stat {
-  padding: 12px 0;
+  transition: background .15s, color .15s;
+  letter-spacing: -.1px;
   text-align: center;
 }
-.stat + .stat { border-left: 1px solid var(--edge); }
+.seg-btn.on {
+  background: var(--surface2);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 1px rgba(0,0,0,.04);
+}
+
+/* ─── STAT ROW ─── */
+.stats {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 12px 20px 0;
+}
+.stat-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  border: 1px solid var(--line-soft);
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  -webkit-user-select: none; user-select: none;
+}
+.stat-card:active { background: var(--surface2); }
+.stat-card.active-filter { border-color: var(--blue); background: var(--blue-soft); }
+.stat-card.active-filter .stat-l { color: var(--blue); }
+
+/* Editor toggle */
+.editor-toggle {
+  display: flex;
+  background: var(--surface2);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  gap: 2px;
+}
+.editor-opt {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink2);
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  text-align: center;
+}
+.editor-opt.on {
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+
+/* Edit mode in detail */
+.edit-field {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--blue);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 15px;
+  color: var(--ink);
+  font-family: var(--sf);
+  margin-bottom: 4px;
+}
+.edit-field:focus { outline: none; }
+.edit-textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--blue);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--ink2);
+  font-family: var(--sf);
+  line-height: 1.6;
+  height: 110px;
+  resize: none;
+  margin-bottom: 4px;
+}
+.edit-textarea:focus { outline: none; }
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.btn-save-edit {
+  background: var(--blue);
+  border: none;
+  border-radius: var(--radius-xs);
+  padding: 7px 16px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.btn-save-edit:active { opacity: .8; }
+.btn-cancel-edit {
+  background: var(--surface2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xs);
+  padding: 7px 14px;
+  color: var(--ink2);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.edit-btn {
+  background: none;
+  border: none;
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-family: var(--sf);
+}
 .stat-n {
-  font-family: 'Lora', serif;
-  font-style: italic;
-  font-size: 26px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -1px;
   line-height: 1;
   color: var(--ink);
 }
 .stat-l {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 500;
   color: var(--ink3);
-  margin-top: 4px;
+  margin-top: 3px;
+  letter-spacing: .1px;
 }
 
-/* ── SCROLL AREA ── */
+/* ─── SCROLL AREA ─── */
 .scroll {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  padding: 12px 20px 32px;
 }
+.scroll::-webkit-scrollbar { width: 0; }
 
-/* ── BOARD ── */
-.board {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  padding: 16px 20px;
-  gap: 16px;
-  align-items: start;
+/* ─── SECTION HEADER ─── */
+.section-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  margin-top: 8px;
 }
-.lane-head {
-  margin-bottom: 12px;
-}
-.lane-label {
+.section-hdr:first-child { margin-top: 0; }
+.section-title {
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1px;
+  font-weight: 600;
+  letter-spacing: .5px;
   text-transform: uppercase;
-  margin-bottom: 2px;
-}
-.lane-j .lane-label { color: var(--jon); }
-.lane-d .lane-label { color: var(--des); }
-.lane-meta {
-  font-size: 10px;
-  color: var(--ink3);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.lane-cnt {
-  background: var(--lift);
-  border: 1px solid var(--edge);
-  border-radius: 20px;
-  padding: 1px 8px;
-  font-size: 10px;
-  font-weight: 600;
   color: var(--ink3);
 }
-
-/* ── VIDEO CARD ── */
-.vcard {
-  background: var(--card);
-  border: 1px solid var(--edge);
-  border-radius: var(--radius);
-  padding: 13px 14px 11px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  transition: transform .12s, box-shadow .12s, border-color .15s;
-}
-.vcard:hover { border-color: var(--edge2); }
-.vcard:active { transform: scale(.97); box-shadow: none; }
-.vcard-bar {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  border-radius: var(--radius) var(--radius) 0 0;
-}
-.lane-j .vcard-bar { background: linear-gradient(90deg, var(--jon-bar), #B0A8F8); }
-.lane-d .vcard-bar { background: linear-gradient(90deg, var(--des-bar), #F0B860); }
-.vtitle {
+.section-action {
   font-size: 13px;
-  font-weight: 600;
-  line-height: 1.4;
-  color: var(--ink);
-  margin-bottom: 7px;
-  padding-right: 2px;
+  font-weight: 500;
+  color: var(--blue);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  letter-spacing: -.1px;
 }
-.vfoot {
+.section-action:active { opacity: .6; }
+
+/* ─── VIDEO LIST ─── */
+.vid-list {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--line-soft);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.vid-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line-soft);
+  cursor: pointer;
+  transition: background .12s;
+  -webkit-user-select: none; user-select: none;
+}
+.vid-item:last-child { border-bottom: none; }
+.vid-item:active { background: var(--surface2); }
+.vid-left { flex: 1; min-width: 0; }
+.vid-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+.vid-meta {
+  display: flex;
+  align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
 }
-.vdate { font-size: 10px; color: var(--ink3); }
-.no-video {
-  text-align: center;
-  padding: 32px 8px 16px;
+.vid-date { font-size: 12px; color: var(--ink3); }
+.vid-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.chevron {
   color: var(--ink3);
-  font-size: 11px;
-  line-height: 2;
+  margin-left: 4px;
+  flex-shrink: 0;
 }
-.no-video-icon { font-size: 28px; display: block; margin-bottom: 4px; opacity: .4; }
+.chevron svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
 
-/* ── BADGE ── */
+/* ─── BADGES ─── */
 .badge {
-  display: inline-flex; align-items: center;
-  padding: 3px 9px;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
   border-radius: 20px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .1px;
   white-space: nowrap;
 }
-.b-p { background: var(--pend-bg); color: var(--pend-tx); }
-.b-e { background: var(--edit-bg); color: var(--edit-tx); }
-.b-d { background: var(--done-bg); color: var(--done-tx); }
+.b-pend { background: var(--pend-bg); color: var(--pend-tx); }
+.b-edit { background: var(--edit-bg); color: var(--edit-tx); }
+.b-done { background: var(--done-bg); color: var(--done-tx); }
+.b-urg  { background: var(--urg-bg);  color: var(--urg-tx);  }
+.b-eve  { background: var(--eve-bg);  color: var(--eve-tx);  }
 
-/* ── WEEK VIEW ── */
-.week-wrap { padding: 16px 20px; }
-.week-nav {
-  display: flex; align-items: center; gap: 10px;
+/* ─── EMPTY STATE ─── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  text-align: center;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--line-soft);
+  margin-bottom: 16px;
+}
+.empty-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+  opacity: .5;
+}
+.empty-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+  letter-spacing: -.3px;
+}
+.empty-sub {
+  font-size: 14px;
+  color: var(--ink2);
+  max-width: 200px;
+  line-height: 1.4;
+}
+
+/* ─── CALENDAR VIEW ─── */
+.cal-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 14px;
 }
-.week-lbl {
-  flex: 1; text-align: center;
-  font-family: 'Lora', serif;
-  font-style: italic;
-  font-size: 16px;
+.cal-lbl {
+  flex: 1;
+  text-align: center;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -.3px;
   color: var(--ink);
 }
-.day-block {
-  background: var(--card);
-  border: 1px solid var(--edge);
+.cal-day {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
   border-radius: var(--radius);
   margin-bottom: 8px;
   overflow: hidden;
-  box-shadow: var(--shadow);
 }
-.day-hdr {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 9px 14px;
-  background: var(--lift);
-  border-bottom: 1px solid var(--edge);
+.cal-day-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--line-soft);
 }
-.day-name { font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--ink2); }
-.day-num  { font-size: 12px; font-weight: 600; color: var(--ink3); }
-.day-hdr.today .day-name,
-.day-hdr.today .day-num { color: var(--jon); }
-.day-item {
-  display: flex; align-items: center; gap: 9px;
-  padding: 8px 14px;
-  border-bottom: 1px solid var(--edge);
-  font-size: 11px;
+.cal-day-name {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .3px;
+  text-transform: uppercase;
   color: var(--ink2);
 }
-.day-item:last-child { border-bottom: none; }
-.ddot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.ddot-j { background: var(--jon-bar); }
-.ddot-d { background: var(--des-bar); }
-.dtitle { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.day-empty { padding: 9px 14px; font-size: 11px; color: var(--ink3); font-style: italic; }
+.cal-day-num {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink3);
+}
+.cal-day-hdr.today .cal-day-name,
+.cal-day-hdr.today .cal-day-num {
+  color: var(--blue);
+}
+.cal-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 13px;
+  color: var(--ink);
+}
+.cal-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
+.cal-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.cal-empty {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--ink3);
+  border-top: 1px solid var(--line-soft);
+  font-style: italic;
+}
 
-/* ── ARCHIVE VIEW ── */
-.arch-wrap { padding: 16px 20px; }
-.arch-month {
-  font-size: 10px; font-weight: 700; letter-spacing: 1px;
-  text-transform: uppercase; color: var(--ink3);
-  margin: 14px 0 8px;
+/* ─── ARCHIVE VIEW ─── */
+.arch-month-lbl {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin: 16px 0 8px;
 }
-.arch-month:first-child { margin-top: 0; }
-.arch-card {
-  background: var(--card);
-  border: 1px solid var(--edge);
-  border-radius: var(--radius);
-  padding: 11px 14px;
-  margin-bottom: 7px;
-  opacity: .65;
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
-.arch-card::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0;
-  height: 3px;
-}
-.arch-card.jonathan::before { background: var(--jon-bar); }
-.arch-card.desmond::before  { background: var(--des-bar); }
-.arch-title { font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
-.arch-meta  { font-size: 10px; color: var(--ink3); }
-.arch-empty { text-align: center; padding: 48px 0; color: var(--ink3); font-size: 12px; }
+.arch-month-lbl:first-child { margin-top: 0; }
 
-/* ── SHEETS VIEW ── */
-.sheets-wrap { padding: 16px 20px; }
-.s-card {
-  background: var(--card);
-  border: 1px solid var(--edge);
+/* ─── SHEETS VIEW ─── */
+.info-card {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
   border-radius: var(--radius);
   padding: 16px;
-  margin-bottom: 12px;
-  box-shadow: var(--shadow);
-}
-.s-card-title {
-  font-size: 10px; font-weight: 700; letter-spacing: .8px;
-  text-transform: uppercase; color: var(--ink3);
   margin-bottom: 10px;
-  display: flex; align-items: center; gap: 7px;
+}
+.info-card-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .sheet-link {
-  font-size: 13px; font-weight: 500;
-  color: var(--jon);
-  display: flex; align-items: center; gap: 5px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  gap: 5px;
   margin-bottom: 12px;
   text-decoration: none;
-  word-break: break-all;
 }
-.sheet-link:hover { text-decoration: underline; }
+.sheet-link:active { opacity: .7; }
 .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .action-btn {
-  background: var(--ink);
+  background: var(--blue);
   border: none;
   border-radius: var(--radius-sm);
-  padding: 9px 14px;
-  color: var(--bg);
+  padding: 8px 14px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .3px;
-  display: flex; align-items: center; gap: 5px;
+  letter-spacing: -.1px;
   transition: opacity .15s;
 }
-.action-btn:hover { opacity: .85; }
-.action-btn.outline {
-  background: var(--lift);
-  color: var(--ink2);
-  border: 1px solid var(--edge);
-}
-.etbl-wrap {
-  border: 1px solid var(--edge);
-  border-radius: var(--radius-sm);
-  overflow: auto;
-}
-.etbl {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 11px;
-}
-.etbl th {
-  padding: 9px 11px;
-  text-align: left;
-  background: var(--lift);
-  color: var(--ink2);
-  font-size: 10px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase;
-  border-bottom: 1px solid var(--edge);
-  white-space: nowrap;
-}
-.etbl td {
-  padding: 8px 11px;
-  border-bottom: 1px solid var(--edge);
+.action-btn:active { opacity: .8; }
+.action-btn.ghost {
+  background: var(--surface2);
   color: var(--ink);
-  max-width: 150px;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  border: 1px solid var(--line);
 }
+.etbl-wrap { overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid var(--line-soft); }
+.etbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.etbl th { padding: 9px 12px; text-align: left; background: var(--surface2); color: var(--ink2); font-weight: 600; font-size: 11px; letter-spacing: .3px; text-transform: uppercase; border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
+.etbl td { padding: 9px 12px; border-bottom: 1px solid var(--line-soft); color: var(--ink); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .etbl tr:last-child td { border-bottom: none; }
-.setup-box {
-  background: var(--pend-bg);
-  border: 1px solid #D4831E;
+
+/* Setup */
+.setup-card {
+  background: var(--amber-soft, #FFF6E8);
+  border: 1px solid var(--amber);
   border-radius: var(--radius);
   padding: 16px;
   margin-bottom: 12px;
 }
-.setup-title { font-size: 13px; font-weight: 700; color: var(--des); margin-bottom: 6px; }
-.setup-body  { font-size: 12px; color: var(--pend-tx); line-height: 1.75; margin-bottom: 10px; }
-.setup-body a { color: var(--edit-tx); }
+.setup-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+.setup-body { font-size: 13px; color: var(--ink2); line-height: 1.6; margin-bottom: 12px; }
 .setup-steps {
-  background: var(--card);
-  border: 1px solid var(--edge);
+  background: var(--surface);
   border-radius: var(--radius-sm);
   padding: 13px 14px;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.9;
   color: var(--ink2);
   margin-bottom: 12px;
   display: none;
 }
 .setup-steps b { color: var(--ink); }
-code {
-  background: var(--lift);
-  border: 1px solid var(--edge);
-  border-radius: 4px;
-  padding: 1px 5px;
-  font-size: 10px;
-}
+code { background: var(--surface2); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 11px; }
 .setup-input {
   width: 100%;
-  background: var(--card);
-  border: 1px solid var(--edge2);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   padding: 10px 12px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--ink);
   font-family: monospace;
   margin-bottom: 10px;
 }
-.setup-input:focus { outline: none; border-color: var(--jon-bar); }
-.connected-box {
+.setup-input:focus { outline: none; border-color: var(--blue); }
+.connected-card {
   background: var(--done-bg);
-  border: 1px solid var(--done-tx);
+  border: 1px solid var(--green);
   border-radius: var(--radius);
   padding: 13px 16px;
   margin-bottom: 12px;
-  display: flex; align-items: center; gap: 10px;
-  font-size: 12px; font-weight: 600; color: var(--done-tx);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--done-tx);
 }
 
-/* ── TOAST ── */
+/* ─── TOAST ─── */
 .toast {
   position: fixed;
   bottom: 28px;
   left: 50%;
-  transform: translateX(-50%) translateY(4px);
-  background: var(--ink);
-  color: var(--bg);
+  transform: translateX(-50%) translateY(6px);
+  background: rgba(29, 29, 31, 0.88);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  color: #fff;
   border-radius: 20px;
   padding: 10px 20px;
-  font-size: 12px; font-weight: 600; letter-spacing: .2px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -.1px;
   pointer-events: none;
   white-space: nowrap;
   z-index: 600;
   opacity: 0;
   transition: opacity .2s, transform .2s;
 }
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
+.dark .toast { background: rgba(99, 99, 102, 0.7); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ── MODAL OVERLAY ── */
-.modal-wrap {
-  position: fixed; inset: 0; z-index: 300;
-  display: flex; flex-direction: column; justify-content: flex-end;
+/* ─── MODAL SYSTEM ─── */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   align-items: center;
   visibility: hidden;
+  pointer-events: none;
 }
-.modal-wrap.open { visibility: visible; }
-.modal-bg {
-  position: absolute; inset: 0;
-  background: rgba(0,0,0,0);
-  backdrop-filter: blur(0px);
-  transition: background .25s, backdrop-filter .25s;
+.modal.open { visibility: visible; pointer-events: all; }
+.modal-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  opacity: 0;
+  transition: opacity .28s;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
-.modal-wrap.open .modal-bg {
-  background: rgba(0,0,0,.48);
-  backdrop-filter: blur(3px);
-}
-.modal-panel {
+.modal.open .modal-scrim { opacity: 1; }
+.modal-sheet {
   position: relative;
   width: 100%;
-  max-width: 560px;
-  background: var(--card);
+  max-width: 600px;
+  background: var(--surface);
   border-radius: 20px 20px 0 0;
-  border: 1px solid var(--edge);
-  border-bottom: none;
-  padding: 0 28px 48px;
-  max-height: 92vh;
+  padding: 0 20px 40px;
+  max-height: 94vh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  box-shadow: var(--shadow-modal);
   transform: translateY(100%);
-  transition: transform .3s cubic-bezier(.32,0,.15,1);
+  transition: transform .32s cubic-bezier(.32, 0, .15, 1);
+  border-top: .5px solid var(--line-soft);
 }
-.modal-wrap.open .modal-panel { transform: translateY(0); }
-.modal-handle {
-  width: 40px; height: 4px;
-  background: var(--edge2);
+.modal.open .modal-sheet { transform: translateY(0); }
+.modal-grip {
+  width: 36px;
+  height: 4px;
+  background: var(--line);
   border-radius: 4px;
-  margin: 12px auto 18px;
+  margin: 10px auto 18px;
 }
-.modal-top {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  margin-bottom: 20px; gap: 10px;
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
 }
 .modal-title {
-  font-family: 'Lora', serif;
-  font-style: italic;
-  font-size: 21px;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -.4px;
   color: var(--ink);
-  line-height: 1.2;
 }
-.close-btn {
-  background: var(--lift);
-  border: 1px solid var(--edge);
+.modal-close {
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  width: 32px; height: 32px;
-  display: flex; align-items: center; justify-content: center;
+  background: var(--surface2);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   color: var(--ink2);
-  font-size: 17px;
+  font-size: 16px;
   flex-shrink: 0;
-  line-height: 1;
   transition: background .15s;
+  line-height: 1;
 }
-.close-btn:hover, .close-btn:active { background: var(--edge); }
+.modal-close:active { background: var(--line); }
 
-/* ── FORM ── */
-.f-group { margin-bottom: 16px; }
+/* ─── FORM ─── */
+.f-group { margin-bottom: 18px; }
 .f-label {
   display: block;
-  font-size: 10px; font-weight: 700; letter-spacing: .8px;
-  text-transform: uppercase; color: var(--ink3);
-  margin-bottom: 7px;
-}
-.f-input, .f-textarea {
-  width: 100%;
-  background: var(--lift);
-  border: 1px solid var(--edge);
-  border-radius: var(--radius-sm);
-  padding: 11px 13px;
-  font-size: 13px;
-  color: var(--ink);
-  line-height: 1.4;
-  transition: border-color .15s, background .15s;
-}
-.f-input:focus, .f-textarea:focus {
-  outline: none;
-  border-color: var(--jon-bar);
-  background: var(--card);
-}
-.f-textarea { height: 120px; resize: none; }
-.boss-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.boss-opt {
-  border: 1.5px solid var(--edge);
-  border-radius: var(--radius);
-  padding: 14px 10px;
-  text-align: center;
-  cursor: pointer;
-  background: var(--lift);
-  transition: all .15s;
-  user-select: none;
-}
-.boss-opt:active { transform: scale(.96); }
-.boss-opt.sel-j { border-color: var(--jon-bar); background: var(--jon-bg); }
-.boss-opt.sel-d { border-color: var(--des-bar); background: var(--des-bg); }
-.boss-av {
-  width: 36px; height: 36px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 12px; letter-spacing: .5px;
-  margin: 0 auto 7px;
-}
-.av-j { background: var(--jon-bar); color: #fff; }
-.av-d { background: var(--des-bar); color: #fff; }
-.boss-name { font-size: 13px; font-weight: 700; color: var(--ink); }
-.boss-editor { font-size: 10px; color: var(--ink3); margin-top: 2px; }
-.boss-opt.sel-j .boss-name { color: var(--jon); }
-.boss-opt.sel-d .boss-name { color: var(--des); }
-}
-.form-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 8px;
-}
-.btn-cancel {
-  background: var(--lift);
-  border: 1px solid var(--edge);
-  border-radius: var(--radius-sm);
-  padding: 12px;
-  color: var(--ink2);
-  cursor: pointer;
-  font-size: 13px; font-weight: 600;
-  transition: background .15s;
-}
-.btn-cancel:hover { background: var(--edge); }
-.btn-save {
-  background: var(--ink);
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: 12px;
-  color: var(--bg);
-  cursor: pointer;
-  font-size: 13px; font-weight: 700; letter-spacing: .3px;
-  transition: opacity .15s;
-}
-.btn-save:hover { opacity: .88; }
-.btn-save:disabled { opacity: .4; cursor: not-allowed; }
-
-/* ── DETAIL MODAL ── */
-.det-header {
-  display: flex; align-items: center; gap: 12px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--edge);
-  margin-bottom: 16px;
-}
-.det-boss-name { font-size: 14px; font-weight: 700; }
-.det-editor-tag { font-size: 11px; color: var(--ink3); margin-top: 2px; }
-.det-title {
-  font-family: 'Lora', serif;
-  font-style: italic;
-  font-size: 20px;
-  line-height: 1.35;
-  color: var(--ink);
-  margin-bottom: 6px;
-}
-.det-date { font-size: 11px; color: var(--ink3); margin-bottom: 16px; }
-.det-section {
-  font-size: 10px; font-weight: 700; letter-spacing: .8px;
-  text-transform: uppercase; color: var(--ink3);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--ink3);
   margin-bottom: 8px;
 }
-.script-box {
-  background: var(--lift);
-  border: 1px solid var(--edge);
+.f-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--line-soft);
   border-radius: var(--radius-sm);
-  padding: 13px 14px;
-  font-size: 12px; color: var(--ink2);
-  line-height: 1.8;
+  padding: 12px 14px;
+  font-size: 15px;
+  color: var(--ink);
+  transition: border-color .15s, background .15s;
+}
+.f-input:focus { outline: none; border-color: var(--blue); background: var(--surface); }
+.f-textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--ink);
+  line-height: 1.5;
+  height: 120px;
+  resize: none;
+  transition: border-color .15s, background .15s;
+}
+.f-textarea:focus { outline: none; border-color: var(--blue); background: var(--surface); }
+
+/* Urgency picker */
+.urg-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.urg-opt {
+  border: 1.5px solid var(--line-soft);
+  border-radius: var(--radius);
+  padding: 14px 12px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--surface2);
+  transition: all .15s;
+  -webkit-user-select: none;
+}
+.urg-opt:active { transform: scale(.97); }
+.urg-opt.sel-u { border-color: var(--red);   background: var(--urg-bg); }
+.urg-opt.sel-e { border-color: var(--green);  background: var(--eve-bg); }
+.urg-icon { font-size: 26px; display: block; margin-bottom: 6px; }
+.urg-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+.urg-desc { font-size: 11px; color: var(--ink3); margin-top: 2px; }
+.urg-opt.sel-u .urg-name { color: var(--urg-tx); }
+.urg-opt.sel-e .urg-name { color: var(--eve-tx); }
+
+/* Form actions */
+.form-actions {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 10px;
+  margin-top: 6px;
+}
+.btn-ghost {
+  background: var(--surface2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 13px;
+  color: var(--ink2);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s;
+}
+.btn-ghost:active { background: var(--line); }
+.btn-primary {
+  background: var(--blue);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 13px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -.1px;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.btn-primary:active, .btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+
+/* ─── DETAIL MODAL ─── */
+.det-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line-soft);
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.det-date { font-size: 13px; color: var(--ink3); display: flex; align-items: center; gap: 5px; }
+.det-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -.5px;
+  color: var(--ink);
+  margin-bottom: 6px;
+  line-height: 1.25;
+}
+.script-card {
+  background: var(--surface2);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  font-size: 13px;
+  color: var(--ink2);
+  line-height: 1.75;
   max-height: 160px;
   overflow-y: auto;
   white-space: pre-wrap;
-  margin-bottom: 18px;
-}
-.status-btns {
-  display: flex; gap: 8px; flex-wrap: wrap;
   margin-bottom: 20px;
 }
+.det-section { font-size: 11px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; color: var(--ink3); margin-bottom: 10px; }
+.status-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
 .s-btn {
-  border: 1.5px solid var(--edge);
+  border: 1.5px solid var(--line);
   border-radius: 20px;
-  padding: 7px 16px;
-  background: var(--lift);
+  padding: 7px 18px;
+  background: var(--surface2);
   cursor: pointer;
-  font-size: 12px; font-weight: 600;
+  font-size: 13px;
+  font-weight: 600;
   color: var(--ink2);
   transition: all .15s;
 }
@@ -759,365 +903,286 @@ code {
 .s-btn.sp { background: var(--pend-bg); border-color: var(--pend-tx); color: var(--pend-tx); }
 .s-btn.se { background: var(--edit-bg); border-color: var(--edit-tx); color: var(--edit-tx); }
 .s-btn.sd { background: var(--done-bg); border-color: var(--done-tx); color: var(--done-tx); }
-/* ── URGENCY TAG ── */
-.urgency-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.urgency-opt {
-  border: 1.5px solid var(--edge);
-  border-radius: var(--radius);
-  padding: 11px 10px;
-  text-align: center;
+.urg-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+.u-btn {
+  border: 1.5px solid var(--line);
+  border-radius: 20px;
+  padding: 7px 18px;
+  background: var(--surface2);
   cursor: pointer;
-  background: var(--lift);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink2);
   transition: all .15s;
-  user-select: none;
 }
-.urgency-opt:active { transform: scale(.96); }
-.urgency-opt.sel-urgent {
-  border-color: #C02020;
-  background: #FFF0F0;
-}
-.urgency-opt.sel-urgent .uname { color: #C02020; }
-.dark .urgency-opt.sel-urgent { background: #3A0808; }
-.urgency-opt.sel-evergreen {
-  border-color: #0C6030;
-  background: var(--done-bg);
-}
-.urgency-opt.sel-evergreen .uname { color: #0C6030; }
-.dark .urgency-opt.sel-evergreen { background: #042812; }
-.uicon { font-size: 22px; display: block; margin-bottom: 5px; }
-.uname { font-size: 13px; font-weight: 700; color: var(--ink); }
-.udesc { font-size: 10px; color: var(--ink3); margin-top: 2px; }
-.urgency-badge {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 3px 9px; border-radius: 20px;
-  font-size: 10px; font-weight: 700; letter-spacing: .2px;
-  white-space: nowrap;
-}
-.u-urgent    { background: #FFE8E8; color: #C02020; }
-.u-evergreen { background: var(--done-bg); color: var(--done-tx); }
-.dark .u-urgent { background: #3A0808; color: #F07070; }
-
-.del-section { padding-top: 10px; border-top: 1px solid var(--edge); }
-.del-btn {
+.u-btn:active { transform: scale(.96); }
+.u-btn.su { background: var(--urg-bg); border-color: var(--urg-tx); color: var(--urg-tx); }
+.u-btn.se2 { background: var(--eve-bg); border-color: var(--eve-tx); color: var(--eve-tx); }
+.det-del {
   width: 100%;
   background: none;
-  border: 1px solid rgba(192,32,32,.2);
+  border: 1px solid rgba(255,59,48,.25);
   border-radius: var(--radius-sm);
-  padding: 11px;
-  cursor: pointer;
-  font-size: 12px; font-weight: 600;
+  padding: 12px;
   color: var(--red);
-  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   transition: background .15s;
+  margin-top: 6px;
 }
-.del-btn:hover { background: rgba(192,32,32,.06); }
+.det-del:active { background: var(--red-soft); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, .modal-sheet, .toast { transition: none; animation: none; }
+}
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- HEADER -->
-  <header class="hdr">
-    <div class="logo">
-      <div class="logo-title">Reels Tracker</div>
-      <div class="logo-sub">Production Board</div>
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="topbar-eyebrow">Production</div>
+      <div class="topbar-name">Desmond's Reels</div>
     </div>
-    <div class="hdr-right">
-      <button class="sync-pill" onclick="doRefresh()" title="Sync with Google Sheet" id="sync-pill">
+    <div class="topbar-actions">
+      <button class="sync-pill" onclick="doRefresh()" id="sync-pill">
         <div class="sdot" id="sdot"></div>
         <span id="slbl">Offline</span>
       </button>
-      <button class="icon-btn" onclick="toggleDark()" id="dark-btn" title="Toggle dark mode">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <button class="ico" onclick="toggleDark()" id="dark-btn" aria-label="Toggle dark mode">
+        <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
       <button class="add-btn" onclick="openAdd()">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        New video
+        New
       </button>
-    </div>
-  </header>
-
-  <!-- NAV -->
-  <nav class="nav">
-    <button class="ntab on" onclick="goTab('board', this)">Board</button>
-    <button class="ntab"    onclick="goTab('week',  this)">Calendar</button>
-    <button class="ntab"    onclick="goTab('sheets',this)">Sheets</button>
-    <button class="ntab"    onclick="goTab('archive',this)">Archive</button>
-  </nav>
-
-  <!-- STATS -->
-  <div class="statbar">
-    <div class="stat">
-      <div class="stat-n" id="stn">0</div>
-      <div class="stat-l">Videos</div>
-    </div>
-    <div class="stat">
-      <div class="stat-n" style="color:var(--pend-tx)" id="stp">0</div>
-      <div class="stat-l">Pending</div>
-    </div>
-    <div class="stat">
-      <div class="stat-n" style="color:var(--edit-tx)" id="ste">0</div>
-      <div class="stat-l">Editing</div>
     </div>
   </div>
 
-  <!-- SCROLL AREA -->
+  <!-- SEGMENT CONTROL -->
+  <div class="seg-wrap">
+    <div class="seg">
+      <button class="seg-btn on" onclick="goTab('board',this)">Board</button>
+      <button class="seg-btn"    onclick="goTab('week',this)">Calendar</button>
+      <button class="seg-btn"    onclick="goTab('sheets',this)">Sheets</button>
+      <button class="seg-btn"    onclick="goTab('archive',this)">Archive</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card" id="sc-all" onclick="setFilter('all')">
+      <div class="stat-n" id="stn">0</div>
+      <div class="stat-l">All</div>
+    </div>
+    <div class="stat-card" id="sc-pending" onclick="setFilter('pending')">
+      <div class="stat-n" style="color:var(--pend-tx)" id="stp">0</div>
+      <div class="stat-l">Pending</div>
+    </div>
+    <div class="stat-card" id="sc-done" onclick="setFilter('done')">
+      <div class="stat-n" style="color:var(--done-tx)" id="std">0</div>
+      <div class="stat-l">Done</div>
+    </div>
+  </div>
+
+  <!-- SCROLL -->
   <div class="scroll" id="scr">
 
     <!-- BOARD -->
     <div id="v-board">
-      <div class="board">
-        <div class="lane-j">
-          <div class="lane-head">
-            <div class="lane-label">Jonathan</div>
-            <div class="lane-meta">
-              Sherlynn edits
-              <span class="lane-cnt" id="jcnt">0</span>
-            </div>
-          </div>
-          <div id="jcol">
-            <div class="no-video">
-              <span class="no-video-icon">🎬</span>
-              No videos yet
-            </div>
-          </div>
-        </div>
-        <div class="lane-d">
-          <div class="lane-head">
-            <div class="lane-label">Desmond</div>
-            <div class="lane-meta">
-              Steven edits
-              <span class="lane-cnt" id="dcnt">0</span>
-            </div>
-          </div>
-          <div id="dcol">
-            <div class="no-video">
-              <span class="no-video-icon">🎬</span>
-              No videos yet
-            </div>
-          </div>
-        </div>
+      <div class="section-hdr">
+        <span class="section-title" id="section-title-lbl">Active</span>
+        <button class="section-action" onclick="doArchiveWeek()">Archive done</button>
       </div>
+      <div id="vid-list"></div>
     </div>
 
     <!-- CALENDAR -->
     <div id="v-week" style="display:none">
-      <div class="week-wrap">
-        <div class="week-nav">
-          <button class="icon-btn" onclick="prevWeek()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <span class="week-lbl" id="wlbl"></span>
-          <button class="icon-btn" onclick="nextWeek()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        </div>
-        <div id="day-scroll"></div>
+      <div class="cal-nav">
+        <button class="ico" onclick="prevWeek()">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <span class="cal-lbl" id="wlbl"></span>
+        <button class="ico" onclick="nextWeek()">
+          <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
       </div>
+      <div id="cal-days"></div>
     </div>
 
     <!-- SHEETS -->
     <div id="v-sheets" style="display:none">
-      <div class="sheets-wrap">
-        <div id="setup-zone"></div>
-        <div class="s-card">
-          <div class="s-card-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#0C6030" stroke-width="2" width="14" height="14"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-            Your Google Sheet
-          </div>
-          <a class="sheet-link" href="https://docs.google.com/spreadsheets/d/130m6Q7EgVXcsx_R9tZoXdd7l47nUQFFZbsP0qU_19FM/edit?usp=sharing" target="_blank">
-            Open spreadsheet
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          </a>
-          <div class="btn-row">
-            <button class="action-btn" onclick="cpCSV()">Copy CSV</button>
-            <button class="action-btn outline" onclick="dlCSV()">Download CSV</button>
-            <button class="action-btn outline" onclick="doArchive()">Archive done</button>
-          </div>
+      <div id="setup-zone"></div>
+      <div class="info-card">
+        <div class="info-card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" width="14" height="14"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          Google Sheet
         </div>
-        <div class="etbl-wrap">
-          <table class="etbl">
-            <thead><tr><th>Date</th><th>Boss</th><th>Title</th><th>Editor</th><th>Status</th></tr></thead>
-            <tbody id="etbody"></tbody>
-          </table>
+        <a class="sheet-link" href="https://docs.google.com/spreadsheets/d/130m6Q7EgVXcsx_R9tZoXdd7l47nUQFFZbsP0qU_19FM/edit?usp=sharing" target="_blank">
+          Open spreadsheet
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
+        <div class="btn-row">
+          <button class="action-btn" onclick="cpCSV()">Copy CSV</button>
+          <button class="action-btn ghost" onclick="dlCSV()">Download</button>
         </div>
+      </div>
+      <div class="etbl-wrap" style="margin-top:12px">
+        <table class="etbl">
+          <thead><tr><th>Date</th><th>Title</th><th>Type</th><th>Status</th></tr></thead>
+          <tbody id="etbody"></tbody>
+        </table>
       </div>
     </div>
 
     <!-- ARCHIVE -->
     <div id="v-archive" style="display:none">
-      <div class="arch-wrap" id="arch-wrap">
-        <div class="arch-empty" id="arch-empty">No archived videos yet.</div>
+      <div id="arch-content">
+        <div class="empty">
+          <div class="empty-icon">🗂️</div>
+          <div class="empty-title">Nothing archived yet</div>
+          <div class="empty-sub">Done videos are archived weekly from the Board tab</div>
+        </div>
       </div>
     </div>
 
   </div><!-- /scroll -->
-
 </div><!-- /app -->
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- ADD MODAL -->
-<div class="modal-wrap" id="add-modal">
-  <div class="modal-bg" onclick="closeAdd()"></div>
-  <div class="modal-panel">
-    <div class="modal-handle"></div>
-    <div class="modal-top">
-      <span class="modal-title">New video</span>
-      <button class="close-btn" onclick="closeAdd()" aria-label="Close">&#215;</button>
-    </div>
-
-    <div class="f-group">
-      <span class="f-label">Who sent the script?</span>
-      <div class="boss-grid">
-        <div class="boss-opt" id="opt-j" onclick="pickBoss('jonathan')">
-          <div class="boss-av av-j">JN</div>
-          <div class="boss-name">Jonathan</div>
-          <div class="boss-editor">Sherlynn edits</div>
-        </div>
-        <div class="boss-opt" id="opt-d" onclick="pickBoss('desmond')">
-          <div class="boss-av av-d">DS</div>
-          <div class="boss-name">Desmond</div>
-          <div class="boss-editor">Steven edits</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="f-group">
-      <label class="f-label" for="f-script">Script</label>
-      <textarea class="f-textarea" id="f-script" placeholder="Paste the WhatsApp script here…"></textarea>
+<!-- ═══ ADD MODAL ═══ -->
+<div class="modal" id="add-modal">
+  <div class="modal-scrim" onclick="closeAdd()"></div>
+  <div class="modal-sheet">
+    <div class="modal-grip"></div>
+    <div class="modal-header">
+      <span class="modal-title">New reel</span>
+      <button class="modal-close" onclick="closeAdd()">&#215;</button>
     </div>
 
     <div class="f-group">
       <label class="f-label" for="f-title">Title</label>
-      <input class="f-input" id="f-title" placeholder="Type a short title…" />
+      <input class="f-input" id="f-title" placeholder="e.g. Why most people fail at business" autocomplete="off" />
     </div>
 
     <div class="f-group">
-      <label class="f-label" for="f-date">Date received</label>
+      <label class="f-label" for="f-script">Script</label>
+      <textarea class="f-textarea" id="f-script" placeholder="Paste the script from WhatsApp here…"></textarea>
+    </div>
+
+    <div class="f-group">
+      <label class="f-label">Date</label>
       <input class="f-input" id="f-date" type="date" />
     </div>
 
     <div class="f-group">
-      <span class="f-label">Content type</span>
-      <div class="urgency-grid">
-        <div class="urgency-opt" id="opt-urgent" onclick="pickUrgency('urgent')">
-          <span class="uicon">🔥</span>
-          <div class="uname">Urgent</div>
-          <div class="udesc">Time-sensitive</div>
+      <label class="f-label">Editor</label>
+      <div class="editor-toggle">
+        <button class="editor-opt on" id="ed-steven"   onclick="pickEditor('Steven')">Steven</button>
+        <button class="editor-opt"    id="ed-sherlynn" onclick="pickEditor('Sherlynn')">Sherlynn</button>
+      </div>
+    </div>
+
+    <div class="f-group">
+      <label class="f-label">Content type</label>
+      <div class="urg-grid">
+        <div class="urg-opt" id="opt-u" onclick="pickU('urgent')">
+          <span class="urg-icon">🔥</span>
+          <div class="urg-name">Urgent</div>
+          <div class="urg-desc">Time-sensitive</div>
         </div>
-        <div class="urgency-opt" id="opt-evergreen" onclick="pickUrgency('evergreen')">
-          <span class="uicon">🌿</span>
-          <div class="uname">Evergreen</div>
-          <div class="udesc">Always relevant</div>
+        <div class="urg-opt" id="opt-e" onclick="pickU('evergreen')">
+          <span class="urg-icon">🌿</span>
+          <div class="urg-name">Evergreen</div>
+          <div class="urg-desc">Always relevant</div>
         </div>
       </div>
     </div>
 
     <div class="form-actions">
-      <button class="btn-cancel" onclick="closeAdd()">Cancel</button>
-      <button class="btn-save" id="btn-save" onclick="saveVideo()">Add video</button>
+      <button class="btn-ghost" onclick="closeAdd()">Cancel</button>
+      <button class="btn-primary" id="btn-save" onclick="saveVideo()">Add reel</button>
     </div>
   </div>
 </div>
 
-<!-- DETAIL MODAL -->
-<div class="modal-wrap" id="det-modal">
-  <div class="modal-bg" onclick="closeDet()"></div>
-  <div class="modal-panel">
-    <div class="modal-handle"></div>
-    <div class="modal-top">
-      <span class="modal-title" id="det-modal-title">Video</span>
-      <button class="close-btn" onclick="closeDet()" aria-label="Close">&#215;</button>
+<!-- ═══ DETAIL MODAL ═══ -->
+<div class="modal" id="det-modal">
+  <div class="modal-scrim" onclick="closeDet()"></div>
+  <div class="modal-sheet">
+    <div class="modal-grip"></div>
+    <div class="modal-header">
+      <span class="modal-title" id="det-modal-title">Reel</span>
+      <button class="modal-close" onclick="closeDet()">&#215;</button>
     </div>
-
-    <div class="det-header" id="det-header"></div>
-    <div class="det-title"  id="det-title"></div>
-    <div class="det-date"   id="det-date"></div>
-
+    <div class="det-title" id="det-title"></div>
+    <div class="det-meta" id="det-meta"></div>
     <div class="det-section">Script</div>
-    <div class="script-box" id="det-script"></div>
-
+    <div class="script-card" id="det-script"></div>
     <div class="det-section">Status</div>
-    <div class="status-btns" id="det-status"></div>
-
+    <div class="status-row" id="det-status"></div>
     <div class="det-section">Content type</div>
-    <div class="urgency-grid" id="det-urgency" style="margin-bottom:20px"></div>
-
-    <div class="del-section">
-      <button class="del-btn" onclick="deleteVideo()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-        Remove this video
-      </button>
-    </div>
+    <div class="urg-row" id="det-urg"></div>
+    <button class="det-del" onclick="deleteVideo()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      Remove reel
+    </button>
   </div>
 </div>
 
 <script>
-// ─── CONFIG ─────────────────────────────────────────────────────────────────
+// ─── CONFIG ───────────────────────────────────────────────────────────────
 let SCRIPT_URL = localStorage.getItem('reels_url') || '';
-// ────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────
 
-const EDITORS = { jonathan: 'Sherlynn', desmond: 'Steven' };
-
-let dark = false;
-let boss = null;
-let urgency = null;   // 'urgent' | 'evergreen' | null
-let currentId = null;
-let weekOffset = 0;
+let dark    = false;
+let urgency = null;
+let editor  = 'Steven';   // default editor
+let curId   = null;
+let weekOff = 0;
+let activeFilter = 'all'; // 'all' | 'pending' | 'editing' | 'done'
 let videos   = JSON.parse(localStorage.getItem('reels_videos')   || '[]');
 let archived = JSON.parse(localStorage.getItem('reels_archived') || '[]');
 
-// ─── DARK MODE ───────────────────────────────────────────────────────────────
+// ─── DARK MODE ────────────────────────────────────────────────────────────
 function toggleDark() {
   dark = !dark;
   document.getElementById('app').className = dark ? 'dark' : '';
-  const btn = document.getElementById('dark-btn');
-  btn.innerHTML = dark
-    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
-    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  document.getElementById('dark-btn').innerHTML = dark
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
   localStorage.setItem('reels_dark', dark ? '1' : '');
 }
 if (localStorage.getItem('reels_dark') === '1') toggleDark();
 
-// ─── TABS ────────────────────────────────────────────────────────────────────
-function goTab(name, btn) {
-  ['board','week','sheets','archive'].forEach(t => {
-    document.getElementById('v-' + t).style.display = t === name ? '' : 'none';
-  });
-  document.querySelectorAll('.ntab').forEach(b => b.classList.remove('on'));
+// ─── TABS ─────────────────────────────────────────────────────────────────
+function goTab(t, btn) {
+  ['board','week','sheets','archive'].forEach(id =>
+    document.getElementById('v-' + id).style.display = id === t ? '' : 'none'
+  );
+  document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('on'));
   btn.classList.add('on');
   document.getElementById('scr').scrollTop = 0;
-  if (name === 'week')    renderWeek();
-  if (name === 'sheets')  { renderExport(); renderSetup(); }
-  if (name === 'archive') renderArchive();
+  if (t === 'week')    renderWeek();
+  if (t === 'sheets')  { renderExport(); renderSetup(); }
+  if (t === 'archive') renderArchive();
 }
 
-// ─── SYNC ────────────────────────────────────────────────────────────────────
+// ─── SYNC ─────────────────────────────────────────────────────────────────
 function setSyncStatus(s) {
-  const dot  = document.getElementById('sdot');
-  const lbl  = document.getElementById('slbl');
-  dot.className = 'sdot' + (s ? ' ' + s : '');
-  lbl.textContent = s === 'ok' ? 'Synced' : s === 'err' ? 'Error' : s === 'spin' ? 'Syncing…' : 'Offline';
-}
-
-async function apiGet(action) {
-  if (!SCRIPT_URL) return null;
-  setSyncStatus('spin');
-  try {
-    const r = await fetch(SCRIPT_URL + '?action=' + action, { cache: 'no-store' });
-    const d = await r.json();
-    setSyncStatus('ok');
-    return d;
-  } catch (e) {
-    setSyncStatus('err');
-    return null;
-  }
+  document.getElementById('sdot').className = 'sdot' + (s ? ' ' + s : '');
+  document.getElementById('slbl').textContent =
+    s === 'ok' ? 'Synced' : s === 'err' ? 'Error' : s === 'spin' ? 'Syncing…' : 'Offline';
 }
 
 async function apiPost(body) {
@@ -1125,330 +1190,419 @@ async function apiPost(body) {
   setSyncStatus('spin');
   try {
     const r = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      body: JSON.stringify(body),
+      method: 'POST', body: JSON.stringify(body),
       headers: { 'Content-Type': 'text/plain' }
     });
     const d = await r.json();
-    setSyncStatus('ok');
-    return d;
-  } catch (e) {
-    setSyncStatus('err');
-    return null;
-  }
+    setSyncStatus('ok'); return d;
+  } catch { setSyncStatus('err'); return null; }
 }
 
 async function doRefresh() {
-  if (!SCRIPT_URL) { showToast('Add your Script URL in the Sheets tab first'); return; }
+  if (!SCRIPT_URL) { showToast('Add your Script URL in Sheets first'); return; }
   showToast('Syncing…');
-  const [vr, ar] = await Promise.all([
-    apiGet('list'),
-    apiGet('listArchive')
-  ]);
-  if (vr?.videos)   videos   = vr.videos.map(v => ({ ...v, id: String(v.id) }));
-  if (ar?.archived) archived = ar.archived.map(v => ({ ...v, id: String(v.id) }));
-  renderAll();
-  saveLocal();
-  showToast('Synced ✓');
+  setSyncStatus('spin');
+  try {
+    const [vr, ar] = await Promise.all([
+      fetch(SCRIPT_URL + '?action=list',        { cache: 'no-store' }).then(r => r.json()),
+      fetch(SCRIPT_URL + '?action=listArchive', { cache: 'no-store' }).then(r => r.json())
+    ]);
+    if (vr?.videos)   videos   = vr.videos.map(v   => ({ ...v,   id: String(v.id) }));
+    if (ar?.archived) archived = ar.archived.map(v  => ({ ...v,   id: String(v.id) }));
+    saveLocal(); renderAll(); setSyncStatus('ok');
+    showToast('Synced ✓');
+  } catch { setSyncStatus('err'); showToast('Sync failed — check connection'); }
 }
 
-// ─── ADD VIDEO ───────────────────────────────────────────────────────────────
+// ─── LOCAL STORAGE ────────────────────────────────────────────────────────
+function saveLocal() {
+  localStorage.setItem('reels_videos',   JSON.stringify(videos));
+  localStorage.setItem('reels_archived', JSON.stringify(archived));
+}
+
+// ─── FILTER ───────────────────────────────────────────────────────────────
+function setFilter(f) {
+  activeFilter = activeFilter === f && f !== 'all' ? 'all' : f;
+  ['all','pending','done'].forEach(k => {
+    const el = document.getElementById('sc-' + k);
+    if (el) el.classList.toggle('active-filter', activeFilter === k && k !== 'all' || (activeFilter === 'all' && k === 'all' && false));
+  });
+  // highlight active card
+  document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active-filter'));
+  if (activeFilter !== 'all') document.getElementById('sc-' + activeFilter)?.classList.add('active-filter');
+  renderBoard();
+}
+
+// ─── EDITOR ───────────────────────────────────────────────────────────────
+function pickEditor(e) {
+  editor = e;
+  document.getElementById('ed-steven').classList.toggle('on', e === 'Steven');
+  document.getElementById('ed-sherlynn').classList.toggle('on', e === 'Sherlynn');
+}
+
+// ─── ADD VIDEO ────────────────────────────────────────────────────────────
 function openAdd() {
-  boss = null;
   urgency = null;
-  document.getElementById('f-script').value = '';
-  document.getElementById('f-title').value  = '';
-  document.getElementById('f-date').value   = new Date().toISOString().split('T')[0];
-  document.getElementById('opt-j').className = 'boss-opt';
-  document.getElementById('opt-d').className = 'boss-opt';
-  document.getElementById('opt-urgent').className   = 'urgency-opt';
-  document.getElementById('opt-evergreen').className = 'urgency-opt';
+  editor  = 'Steven';
+  ['f-title','f-script'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('opt-u').className = 'urg-opt';
+  document.getElementById('opt-e').className = 'urg-opt';
+  document.getElementById('ed-steven').classList.add('on');
+  document.getElementById('ed-sherlynn').classList.remove('on');
   document.getElementById('btn-save').disabled = false;
   document.getElementById('add-modal').classList.add('open');
+  setTimeout(() => document.getElementById('f-title').focus(), 300);
 }
 function closeAdd() { document.getElementById('add-modal').classList.remove('open'); }
 
-function pickBoss(b) {
-  boss = b;
-  document.getElementById('opt-j').className = 'boss-opt' + (b === 'jonathan' ? ' sel-j' : '');
-  document.getElementById('opt-d').className = 'boss-opt' + (b === 'desmond'  ? ' sel-d' : '');
-}
-
-function pickUrgency(u) {
-  urgency = urgency === u ? null : u;  // toggle off if same
-  document.getElementById('opt-urgent').className   = 'urgency-opt' + (urgency === 'urgent'    ? ' sel-urgent'    : '');
-  document.getElementById('opt-evergreen').className = 'urgency-opt' + (urgency === 'evergreen' ? ' sel-evergreen' : '');
+function pickU(u) {
+  urgency = urgency === u ? null : u;
+  document.getElementById('opt-u').className = 'urg-opt' + (urgency === 'urgent'    ? ' sel-u' : '');
+  document.getElementById('opt-e').className = 'urg-opt' + (urgency === 'evergreen' ? ' sel-e' : '');
 }
 
 async function saveVideo() {
-  if (!boss)  { showToast('Please select Jonathan or Desmond'); return; }
-  if (!urgency) { showToast('Please select Urgent or Evergreen'); return; }
   const title  = document.getElementById('f-title').value.trim();
   const script = document.getElementById('f-script').value.trim();
   const date   = document.getElementById('f-date').value;
-  if (!title)  { showToast('Please enter a title'); return; }
-  if (!date)   { showToast('Please pick a date'); return; }
+  if (!title)   { showToast('Please enter a title'); return; }
+  if (!date)    { showToast('Please pick a date'); return; }
+  if (!urgency) { showToast('Please choose Urgent or Evergreen'); return; }
 
-  const btn = document.getElementById('btn-save');
-  btn.disabled = true;
+  document.getElementById('btn-save').disabled = true;
 
-  const video = { boss, title, script, date, editor: EDITORS[boss], status: 'pending', urgency };
-  const result = await apiPost({ action: 'add', video });
-  const newId = result?.id ? String(result.id) : String(Date.now());
-  videos.push({ ...video, id: newId });
+  const video = { title, script, date, status: 'pending', urgency, editor };
+  const res   = await apiPost({ action: 'add', video });
+  const id    = res?.id ? String(res.id) : String(Date.now());
+  videos.push({ ...video, id });
 
-  btn.disabled = false;
-  closeAdd();
-  renderAll();
-  saveLocal();
-  showToast('Added to ' + (boss === 'jonathan' ? 'Jonathan' : 'Desmond') + "'s column");
+  document.getElementById('btn-save').disabled = false;
+  closeAdd(); renderAll(); saveLocal();
+  showToast('Reel added');
 }
 
-// ─── DETAIL ──────────────────────────────────────────────────────────────────
-function openDetail(id) {
-  currentId = id;
+// ─── DETAIL ───────────────────────────────────────────────────────────────
+function openDet(id, editMode) {
+  curId = id;
   const v = videos.find(x => x.id === id);
   if (!v) return;
-  const isJ = v.boss === 'jonathan';
 
-  document.getElementById('det-modal-title').textContent = isJ ? 'Jonathan' : 'Desmond';
-  document.getElementById('det-header').innerHTML = `
-    <div class="boss-av ${isJ ? 'av-j' : 'av-d'}" style="width:30px;height:30px;font-size:11px;flex-shrink:0">${isJ ? 'JN' : 'DS'}</div>
-    <div>
-      <div class="det-boss-name" style="color:${isJ ? 'var(--jon)' : 'var(--des)'}">${isJ ? 'Jonathan' : 'Desmond'}</div>
-      <div class="det-editor-tag">Edited by ${v.editor || EDITORS[v.boss]}</div>
-    </div>`;
-  document.getElementById('det-title').textContent = v.title;
-  document.getElementById('det-date').textContent  = fmtDate(v.date);
+  const bc = v.status === 'pending' ? 'b-pend' : v.status === 'editing' ? 'b-edit' : 'b-done';
+  const bl = v.status === 'pending' ? 'Pending' : v.status === 'editing' ? 'Editing' : 'Done';
 
-  const sb = document.getElementById('det-script');
-  if (v.script) {
-    sb.textContent    = v.script;
-    sb.style.fontStyle = 'normal';
-    sb.style.color    = 'var(--ink2)';
+  document.getElementById('det-modal-title').textContent = fmtDate(v.date);
+
+  if (editMode) {
+    // ── EDIT MODE ──
+    document.getElementById('det-title').innerHTML =
+      `<input class="edit-field" id="edit-title" value="${escH(v.title)}" placeholder="Title" />`;
+    document.getElementById('det-meta').innerHTML =
+      `<button class="btn-save-edit" onclick="saveEdit('${id}')">Save changes</button>
+       <button class="btn-cancel-edit" onclick="openDet('${id}', false)">Cancel</button>`;
+
+    const sc = document.getElementById('det-script');
+    sc.innerHTML = `<textarea class="edit-textarea" id="edit-script" placeholder="Script…">${escH(v.script || '')}</textarea>`;
+    sc.style = '';
+
+    // Date edit
+    document.getElementById('det-status').innerHTML =
+      `<div style="margin-bottom:8px">
+        <div class="det-section" style="margin-bottom:6px">Date</div>
+        <input class="edit-field" id="edit-date" type="date" value="${v.date || ''}" style="max-width:200px" />
+      </div>
+      <div>${[['pending','Pending','sp'],['editing','Editing','se'],['done','Done ✓','sd']].map(([s,l,c]) =>
+        `<button class="s-btn${v.status === s ? ' ' + c : ''}" onclick="setStatus('${id}','${s}')">${l}</button>`
+      ).join('')}</div>`;
+
+    // Editor in edit mode
+    document.getElementById('det-urg').innerHTML =
+      `<div style="width:100%;margin-bottom:12px">
+        <div class="det-section" style="margin-bottom:6px">Editor</div>
+        <div class="editor-toggle" style="max-width:220px">
+          <button class="editor-opt${(v.editor||'Steven')==='Steven'?' on':''}" id="det-ed-s" onclick="setDetEditor('${id}','Steven')">Steven</button>
+          <button class="editor-opt${v.editor==='Sherlynn'?' on':''}" id="det-ed-sh" onclick="setDetEditor('${id}','Sherlynn')">Sherlynn</button>
+        </div>
+      </div>
+      <div><div class="det-section" style="margin-bottom:6px">Content type</div>
+      ${[['urgent','🔥 Urgent','su'],['evergreen','🌿 Evergreen','se2']].map(([u,l,c]) =>
+        `<button class="u-btn${v.urgency === u ? ' ' + c : ''}" onclick="setUrgency('${id}','${u}')">${l}</button>`
+      ).join('')}</div>`;
+
   } else {
-    sb.textContent    = 'No script pasted.';
-    sb.style.fontStyle = 'italic';
-    sb.style.color    = 'var(--ink3)';
+    // ── VIEW MODE ──
+    document.getElementById('det-title').innerHTML =
+      `<span>${escH(v.title)}</span> <button class="edit-btn" onclick="openDet('${id}', true)" style="margin-left:8px;font-size:13px">Edit</button>`;
+    document.getElementById('det-meta').innerHTML =
+      `<span class="badge ${bc}">${bl}</span>` +
+      (v.urgency ? `<span class="badge ${v.urgency === 'urgent' ? 'b-urg' : 'b-eve'}">${v.urgency === 'urgent' ? '🔥 Urgent' : '🌿 Evergreen'}</span>` : '') +
+      `<span class="det-date" style="color:var(--ink3);font-size:13px">${fmtDate(v.date)}</span>` +
+      `<span style="font-size:12px;color:var(--ink3)">✂️ ${v.editor || 'Steven'}</span>`;
+
+    const sc = document.getElementById('det-script');
+    sc.textContent    = v.script || 'No script added.';
+    sc.style.fontStyle = v.script ? 'normal' : 'italic';
+    sc.style.color     = v.script ? 'var(--ink2)' : 'var(--ink3)';
+
+    document.getElementById('det-status').innerHTML =
+      [['pending','Pending','sp'],['editing','Editing','se'],['done','Done ✓','sd']].map(([s,l,c]) =>
+        `<button class="s-btn${v.status === s ? ' ' + c : ''}" onclick="setStatus('${id}','${s}')">${l}</button>`
+      ).join('');
+
+    document.getElementById('det-urg').innerHTML =
+      `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        ${[['urgent','🔥 Urgent','su'],['evergreen','🌿 Evergreen','se2']].map(([u,l,c]) =>
+          `<button class="u-btn${v.urgency === u ? ' ' + c : ''}" onclick="setUrgency('${id}','${u}')">${l}</button>`
+        ).join('')}
+        <span style="font-size:12px;color:var(--ink3);margin-left:4px">Editor: ${v.editor || 'Steven'}</span>
+      </div>`;
   }
-
-  document.getElementById('det-status').innerHTML = [
-    ['pending', 'Pending', 'sp'],
-    ['editing', 'Editing', 'se'],
-    ['done',    'Done ✓',  'sd']
-  ].map(([s, label, cls]) =>
-    `<button class="s-btn${v.status === s ? ' ' + cls : ''}" onclick="setStatus('${id}','${s}')">${label}</button>`
-  ).join('');
-
-  document.getElementById('det-urgency').innerHTML = [
-    ['urgent',    '🔥', 'Urgent',    'Time-sensitive', 'sel-urgent'],
-    ['evergreen', '🌿', 'Evergreen', 'Always relevant', 'sel-evergreen']
-  ].map(([u, icon, name, desc, selCls]) =>
-    `<div class="urgency-opt${v.urgency === u ? ' ' + selCls : ''}" onclick="setUrgency('${id}','${u}')">
-      <span class="uicon">${icon}</span>
-      <div class="uname">${name}</div>
-      <div class="udesc">${desc}</div>
-    </div>`
-  ).join('');
 
   document.getElementById('det-modal').classList.add('open');
 }
 function closeDet() { document.getElementById('det-modal').classList.remove('open'); }
+
+async function saveEdit(id) {
+  const v = videos.find(x => x.id === id);
+  if (!v) return;
+  const newTitle  = document.getElementById('edit-title')?.value.trim();
+  const newScript = document.getElementById('edit-script')?.value.trim();
+  const newDate   = document.getElementById('edit-date')?.value;
+  if (!newTitle) { showToast('Title cannot be empty'); return; }
+  v.title  = newTitle  || v.title;
+  v.script = newScript !== undefined ? newScript : v.script;
+  v.date   = newDate   || v.date;
+  await apiPost({ action: 'update', id, fields: { title: v.title, script: v.script, date: v.date } });
+  renderAll(); saveLocal();
+  openDet(id, false);
+  showToast('Changes saved');
+}
+
+function setDetEditor(id, e) {
+  const v = videos.find(x => x.id === id);
+  if (!v) return;
+  v.editor = e;
+  document.getElementById('det-ed-s')?.classList.toggle('on',  e === 'Steven');
+  document.getElementById('det-ed-sh')?.classList.toggle('on', e === 'Sherlynn');
+  apiPost({ action: 'update', id, fields: { editor: e } });
+  saveLocal();
+}
 
 async function setStatus(id, status) {
   const v = videos.find(x => x.id === id);
   if (!v) return;
   v.status = status;
   await apiPost({ action: 'update', id, fields: { status } });
-  openDetail(id);
-  renderAll();
-  saveLocal();
-  showToast('Status updated to ' + status);
+  openDet(id); renderAll(); saveLocal();
+  showToast('Status updated');
 }
 
 async function setUrgency(id, u) {
   const v = videos.find(x => x.id === id);
   if (!v) return;
-  v.urgency = v.urgency === u ? null : u;  // toggle
+  v.urgency = v.urgency === u ? null : u;
   await apiPost({ action: 'update', id, fields: { urgency: v.urgency } });
-  openDetail(id);
-  renderAll();
-  saveLocal();
-  showToast('Marked as ' + (v.urgency || 'unclassified'));
+  openDet(id); renderAll(); saveLocal();
+  showToast('Type updated');
 }
 
 async function deleteVideo() {
-  if (!confirm('Remove this video from the board?')) return;
-  await apiPost({ action: 'delete', id: currentId });
-  videos = videos.filter(v => v.id !== currentId);
-  closeDet();
-  renderAll();
-  saveLocal();
-  showToast('Video removed');
+  if (!confirm('Remove this reel?')) return;
+  await apiPost({ action: 'delete', id: curId });
+  videos = videos.filter(v => v.id !== curId);
+  closeDet(); renderAll(); saveLocal();
+  showToast('Removed');
 }
 
-// ─── ARCHIVE ─────────────────────────────────────────────────────────────────
-async function doArchive() {
-  const now = new Date();
-  const toArchive = videos.filter(v => {
-    if (v.status !== 'done') return false;
-    const d = new Date(v.date + 'T00:00:00');
-    return d.getMonth() < now.getMonth() || d.getFullYear() < now.getFullYear();
-  });
-  if (!toArchive.length) { showToast('No completed videos from previous months'); return; }
-  for (const v of toArchive) {
+// ─── ARCHIVE DONE VIDEOS ─────────────────────────────────────────────────
+async function doArchiveWeek() {
+  const done = videos.filter(v => v.status === 'done');
+  if (!done.length) { showToast('No done reels to archive'); return; }
+  if (!confirm(`Archive ${done.length} done reel${done.length > 1 ? 's' : ''}?`)) return;
+  const today = new Date().toISOString().split('T')[0];
+  for (const v of done) {
     await apiPost({ action: 'archive', id: v.id });
-    archived.push({ ...v, archivedOn: now.toISOString().split('T')[0] });
+    archived.push({ ...v, archivedOn: today });
   }
-  videos = videos.filter(v => !toArchive.find(o => o.id === v.id));
-  renderAll();
-  saveLocal();
-  showToast(toArchive.length + ' video' + (toArchive.length > 1 ? 's' : '') + ' archived');
+  videos = videos.filter(v => v.status !== 'done');
+  renderAll(); saveLocal();
+  showToast(`${done.length} reel${done.length > 1 ? 's' : ''} archived`);
 }
 
-// ─── RENDER ALL ───────────────────────────────────────────────────────────────
+// ─── RENDER ALL ───────────────────────────────────────────────────────────
 function renderAll() { renderBoard(); updateStats(); }
 
 function updateStats() {
   document.getElementById('stn').textContent = videos.length;
   document.getElementById('stp').textContent = videos.filter(v => v.status === 'pending').length;
-  document.getElementById('ste').textContent = videos.filter(v => v.status === 'editing').length;
+  document.getElementById('std').textContent = videos.filter(v => v.status === 'done').length;
+  // Update section title
+  const t = document.getElementById('section-title-lbl');
+  if (t) t.textContent = activeFilter === 'all' ? 'Active' : activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1);
 }
 
 function renderBoard() {
-  const jv = videos.filter(v => v.boss === 'jonathan').sort((a,b) => new Date(b.date) - new Date(a.date));
-  const dv = videos.filter(v => v.boss === 'desmond' ).sort((a,b) => new Date(b.date) - new Date(a.date));
-  document.getElementById('jcnt').textContent = jv.length;
-  document.getElementById('dcnt').textContent = dv.length;
-  document.getElementById('jcol').innerHTML = jv.length
-    ? jv.map(cardHTML).join('')
-    : '<div class="no-video"><span class="no-video-icon">🎬</span>No videos yet</div>';
-  document.getElementById('dcol').innerHTML = dv.length
-    ? dv.map(cardHTML).join('')
-    : '<div class="no-video"><span class="no-video-icon">🎬</span>No videos yet</div>';
+  const el = document.getElementById('vid-list');
+  const filtered = activeFilter === 'all'
+    ? videos
+    : videos.filter(v => v.status === activeFilter);
+
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty">
+      <div class="empty-icon">${activeFilter === 'all' ? '🎬' : activeFilter === 'pending' ? '⏳' : '✅'}</div>
+      <div class="empty-title">${activeFilter === 'all' ? 'No reels yet' : 'No ' + activeFilter + ' reels'}</div>
+      <div class="empty-sub">${activeFilter === 'all' ? 'Tap New to add Desmond\'s first reel' : 'Tap All to see everything'}</div>
+    </div>`;
+    return;
+  }
+
+  // Sort: pending → editing → done, then newest first within each group
+  const order = ['pending','editing','done'];
+  const sorted = [...filtered].sort((a,b) => {
+    const si = order.indexOf(a.status) - order.indexOf(b.status);
+    if (si !== 0) return si;
+    return new Date(b.date) - new Date(a.date);
+  });
+
+  el.innerHTML = `<div class="vid-list">${sorted.map(v => {
+    const bc = v.status === 'pending' ? 'b-pend' : v.status === 'editing' ? 'b-edit' : 'b-done';
+    const bl = v.status === 'pending' ? 'Pending' : v.status === 'editing' ? 'Editing' : 'Done';
+    const ub = v.urgency === 'urgent'
+      ? '<span class="badge b-urg">🔥</span>'
+      : v.urgency === 'evergreen'
+      ? '<span class="badge b-eve">🌿</span>'
+      : '';
+    const edTag = `<span style="font-size:11px;color:var(--ink3)">✂️ ${v.editor || 'Steven'}</span>`;
+    return `<div class="vid-item" onclick="openDet('${v.id}', false)">
+      <div class="vid-left">
+        <div class="vid-title">${escH(v.title)}</div>
+        <div class="vid-meta">
+          <span class="vid-date">${fmtDate(v.date)}</span>
+          ${ub}
+          ${edTag}
+        </div>
+      </div>
+      <div class="vid-right">
+        <span class="badge ${bc}">${bl}</span>
+      </div>
+      <div class="chevron"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </div>`;
+  }).join('')}</div>`;
 }
 
-function cardHTML(v) {
-  const bc    = v.status === 'pending' ? 'b-p' : v.status === 'editing' ? 'b-e' : 'b-d';
-  const label = v.status === 'pending' ? 'Pending' : v.status === 'editing' ? 'Editing' : 'Done';
-  const urgBadge = v.urgency === 'urgent'
-    ? '<span class="urgency-badge u-urgent">🔥 Urgent</span>'
-    : v.urgency === 'evergreen'
-    ? '<span class="urgency-badge u-evergreen">🌿 Evergreen</span>'
-    : '';
-  return `<div class="vcard" onclick="openDetail('${v.id}')">
-    <div class="vcard-bar"></div>
-    <div class="vtitle">${escHTML(v.title)}</div>
-    <div class="vfoot">
-      <span class="vdate">${fmtDate(v.date)}</span>
-      <span class="badge ${bc}">${label}</span>
-    </div>
-    ${urgBadge ? `<div style="margin-top:6px">${urgBadge}</div>` : ''}
-  </div>`;
-}
-
-// ─── CALENDAR ────────────────────────────────────────────────────────────────
+// ─── CALENDAR ─────────────────────────────────────────────────────────────
 function renderWeek() {
   const now  = new Date();
   const base = new Date(now);
-  base.setDate(now.getDate() - ((now.getDay() + 6) % 7) + weekOffset * 7);
+  base.setDate(now.getDate() - ((now.getDay() + 6) % 7) + weekOff * 7);
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(base); d.setDate(base.getDate() + i); return d;
   });
-  const names    = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const todayStr = now.toISOString().split('T')[0];
+  const DAY = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const today = now.toISOString().split('T')[0];
 
   document.getElementById('wlbl').textContent =
     days[0].toLocaleDateString('en-MY', { day: 'numeric', month: 'short' }) + ' – ' +
-    days[6].toLocaleDateString('en-MY', { day: 'numeric', month: 'short' });
+    days[6].toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' });
 
-  document.getElementById('day-scroll').innerHTML = days.map((d, i) => {
+  document.getElementById('cal-days').innerHTML = days.map((d, i) => {
     const iso   = d.toISOString().split('T')[0];
-    const isT   = iso === todayStr;
+    const isT   = iso === today;
     const dvids = videos.filter(v => v.date === iso);
-    return `<div class="day-block">
-      <div class="day-hdr${isT ? ' today' : ''}">
-        <span class="day-name">${names[i]}${isT ? ' — Today' : ''}</span>
-        <span class="day-num">${d.getDate()}</span>
+    return `<div class="cal-day">
+      <div class="cal-day-hdr${isT ? ' today' : ''}">
+        <span class="cal-day-name">${DAY[i]}${isT ? ' · Today' : ''}</span>
+        <span class="cal-day-num">${d.getDate()}</span>
       </div>
-      ${dvids.map(v => `
-        <div class="day-item">
-          <div class="ddot ${v.boss === 'jonathan' ? 'ddot-j' : 'ddot-d'}"></div>
-          <span class="dtitle">${escHTML(v.title)}</span>
-          <span class="badge ${v.status === 'pending' ? 'b-p' : v.status === 'editing' ? 'b-e' : 'b-d'}">${v.status}</span>
-        </div>`).join('') || '<div class="day-empty">No videos</div>'}
+      ${dvids.length
+        ? dvids.map(v => {
+            const bc = v.status === 'pending' ? 'b-pend' : v.status === 'editing' ? 'b-edit' : 'b-done';
+            const bl = v.status === 'pending' ? 'Pending' : v.status === 'editing' ? 'Editing' : 'Done';
+            return `<div class="cal-item" onclick="openDet('${v.id}')">
+              <div class="cal-dot" style="background:${v.urgency === 'urgent' ? 'var(--red)' : 'var(--green)'}"></div>
+              <span class="cal-title">${escH(v.title)}</span>
+              <span class="badge ${bc}">${bl}</span>
+            </div>`;
+          }).join('')
+        : '<div class="cal-empty">No reels</div>'
+      }
     </div>`;
   }).join('');
 }
-function prevWeek() { weekOffset--; renderWeek(); }
-function nextWeek() { weekOffset++; renderWeek(); }
+function prevWeek() { weekOff--; renderWeek(); }
+function nextWeek() { weekOff++; renderWeek(); }
 
-// ─── ARCHIVE ─────────────────────────────────────────────────────────────────
+// ─── ARCHIVE ──────────────────────────────────────────────────────────────
 function renderArchive() {
-  const el = document.getElementById('arch-wrap');
+  const el = document.getElementById('arch-content');
   if (!archived.length) {
-    el.innerHTML = '<div class="arch-empty">No archived videos yet.</div>';
+    el.innerHTML = `<div class="empty">
+      <div class="empty-icon">🗂️</div>
+      <div class="empty-title">Nothing archived yet</div>
+      <div class="empty-sub">Done reels are archived weekly from the Board tab</div>
+    </div>`;
     return;
   }
-  const byMonth = {};
+  const byWeek = {};
   archived.forEach(v => {
-    const k = (v.archivedOn || v.date || '').slice(0, 7);
-    if (!byMonth[k]) byMonth[k] = [];
-    byMonth[k].push(v);
+    const k = v.archivedOn || v.date || '';
+    if (!byWeek[k]) byWeek[k] = [];
+    byWeek[k].push(v);
   });
-  el.innerHTML = Object.keys(byMonth).sort().reverse().map(m => {
-    const label = new Date(m + '-01').toLocaleDateString('en-MY', { month: 'long', year: 'numeric' });
-    return `<div class="arch-month">${label}</div>` +
-      byMonth[m].map(v => `<div class="arch-card ${v.boss}">
-        <div class="arch-title">${escHTML(v.title)}</div>
-        <div class="arch-meta">${v.boss === 'jonathan' ? 'Jonathan' : 'Desmond'} · ${fmtDate(v.date)} · ${v.editor || EDITORS[v.boss]}</div>
-      </div>`).join('');
+  el.innerHTML = Object.keys(byWeek).sort().reverse().map(k => {
+    const label = 'Archived ' + fmtDate(k);
+    return `<div class="arch-month-lbl">${label}</div>
+    <div class="vid-list">${byWeek[k].map(v => {
+      const bc = v.status === 'done' ? 'b-done' : 'b-pend';
+      return `<div class="vid-item">
+        <div class="vid-left">
+          <div class="vid-title">${escH(v.title)}</div>
+          <div class="vid-meta"><span class="vid-date">${fmtDate(v.date)}</span></div>
+        </div>
+        <span class="badge b-done">Done</span>
+      </div>`;
+    }).join('')}</div>`;
   }).join('');
 }
 
-// ─── EXPORT TABLE ────────────────────────────────────────────────────────────
+// ─── SHEETS ───────────────────────────────────────────────────────────────
 function renderExport() {
   const all = [...videos, ...archived];
   document.getElementById('etbody').innerHTML = all.length
-    ? all.sort((a,b) => new Date(b.date) - new Date(a.date)).map(v => `
-      <tr>
+    ? all.sort((a,b) => new Date(b.date) - new Date(a.date)).map(v => `<tr>
         <td>${fmtDate(v.date)}</td>
-        <td>${v.boss === 'jonathan' ? 'Jonathan' : 'Desmond'}</td>
-        <td title="${escHTML(v.title)}">${escHTML(v.title)}</td>
-        <td>${v.editor || EDITORS[v.boss]}</td>
-        <td><span class="badge ${v.status==='pending'?'b-p':v.status==='editing'?'b-e':'b-d'}">${v.status}</span></td>
+        <td title="${escH(v.title)}">${escH(v.title)}</td>
+        <td>${v.urgency === 'urgent' ? '🔥 Urgent' : v.urgency === 'evergreen' ? '🌿 Evergreen' : '—'}</td>
+        <td><span class="badge ${v.status === 'pending' ? 'b-pend' : v.status === 'editing' ? 'b-edit' : 'b-done'}">${v.status}</span></td>
       </tr>`).join('')
-    : '<tr><td colspan="5" style="padding:16px;text-align:center;color:var(--ink3)">No videos yet.</td></tr>';
+    : '<tr><td colspan="4" style="padding:16px;text-align:center;color:var(--ink3)">No reels yet</td></tr>';
 }
 
-// ─── SETUP SECTION ───────────────────────────────────────────────────────────
 function renderSetup() {
   const el = document.getElementById('setup-zone');
   if (SCRIPT_URL) {
-    el.innerHTML = `<div class="connected-box">
+    el.innerHTML = `<div class="connected-card">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
       Live sync connected
-      <button onclick="clearURL()" style="background:none;border:none;color:var(--done-tx);cursor:pointer;font-size:11px;margin-left:auto;text-decoration:underline;font-family:inherit">Change</button>
+      <button onclick="clearURL()" style="background:none;border:none;color:var(--done-tx);cursor:pointer;font-size:12px;margin-left:auto;text-decoration:underline;font-family:inherit;font-weight:600">Change</button>
     </div>`;
   } else {
-    el.innerHTML = `<div class="setup-box">
-      <div class="setup-title">One-time setup — connect Google Sheet</div>
+    el.innerHTML = `<div class="setup-card">
+      <div class="setup-title">Connect Google Sheet</div>
       <div class="setup-body">
-        Deploy the Apps Script (from the <code>Code.gs</code> file), paste the Web App URL below,
-        and all changes will sync automatically.<br>
-        <a href="#" onclick="toggleSteps(event)">Show setup steps ›</a>
+        Paste your Apps Script Web App URL below to enable live sync across all devices.<br>
+        <a href="#" onclick="toggleSteps(event)" style="color:var(--blue)">Show setup steps ›</a>
       </div>
       <div class="setup-steps" id="setup-steps">
-        <b>5-minute setup:</b><br>
-        1. Go to <a href="https://script.google.com" target="_blank" style="color:var(--edit-tx)">script.google.com</a> → New project<br>
-        2. Delete all existing code, paste the full contents of <code>Code.gs</code><br>
-        3. Click <b>Deploy → New deployment</b><br>
-        4. Type: <b>Web app</b> · Execute as: <b>Me</b> · Who has access: <b>Anyone</b><br>
-        5. Click Deploy, authorise, copy the Web App URL<br>
-        6. Paste it below and click Save
+        <b>One-time 5-minute setup:</b><br>
+        1. Go to <a href="https://script.google.com" target="_blank" style="color:var(--blue)">script.google.com</a> → New project<br>
+        2. Delete all code → paste the <code>Code.gs</code> contents<br>
+        3. Deploy → New deployment → <b>Web app</b><br>
+        4. Execute as: <b>Me</b> · Access: <b>Anyone</b><br>
+        5. Copy the Web App URL → paste below
       </div>
       <input class="setup-input" id="url-input" placeholder="https://script.google.com/macros/s/…/exec" />
-      <button class="action-btn" style="width:100%;justify-content:center" onclick="saveURL()">Save &amp; Connect</button>
+      <button class="action-btn" style="width:100%;justify-content:center;display:flex" onclick="saveURL()">Save &amp; Connect</button>
     </div>`;
   }
 }
@@ -1458,28 +1612,20 @@ function toggleSteps(e) {
   if (el) el.style.display = el.style.display === 'block' ? 'none' : 'block';
 }
 function saveURL() {
-  const url = document.getElementById('url-input')?.value.trim();
-  if (!url || !url.includes('script.google.com')) { showToast('Please paste a valid Apps Script URL'); return; }
-  SCRIPT_URL = url;
-  localStorage.setItem('reels_url', url);
-  renderSetup();
-  showToast('Connected — syncing…');
-  doRefresh();
+  const u = document.getElementById('url-input')?.value.trim();
+  if (!u || !u.includes('script.google.com')) { showToast('Paste a valid Apps Script URL'); return; }
+  SCRIPT_URL = u; localStorage.setItem('reels_url', u);
+  renderSetup(); showToast('Connected — syncing…'); doRefresh();
 }
-function clearURL() {
-  SCRIPT_URL = '';
-  localStorage.removeItem('reels_url');
-  renderSetup();
-}
+function clearURL() { SCRIPT_URL = ''; localStorage.removeItem('reels_url'); renderSetup(); }
 
-// ─── CSV ─────────────────────────────────────────────────────────────────────
+// ─── CSV ──────────────────────────────────────────────────────────────────
 function getCSV() {
   const all = [...videos, ...archived];
-  return 'Date,Boss,Title,Editor,Status,Script\n' + all.map(v =>
+  return 'Date,Title,Type,Status,Script\n' + all.map(v =>
     [v.date,
-     v.boss === 'jonathan' ? 'Jonathan' : 'Desmond',
      '"' + (v.title  || '').replace(/"/g, '""') + '"',
-     v.editor || EDITORS[v.boss],
+     v.urgency || '',
      v.status,
      '"' + (v.script || '').replace(/"/g, '""').replace(/\n/g, ' ') + '"'
     ].join(',')
@@ -1487,40 +1633,35 @@ function getCSV() {
 }
 function cpCSV() {
   navigator.clipboard.writeText(getCSV())
-    .then(()  => showToast('CSV copied — paste into your sheet'))
-    .catch(()  => showToast('Use the Download button instead'));
+    .then(() => showToast('CSV copied'))
+    .catch(() => showToast('Use Download instead'));
 }
 function dlCSV() {
-  const blob = new Blob([getCSV()], { type: 'text/csv' });
+  const b = new Blob([getCSV()], { type: 'text/csv' });
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'reels-tracker.csv';
-  a.click();
+  a.href = URL.createObjectURL(b); a.download = 'desmond-reels.csv'; a.click();
   showToast('CSV downloaded');
 }
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
+// ─── HELPERS ──────────────────────────────────────────────────────────────
 function fmtDate(d) {
-  if (!d) return '';
-  return new Date(d + 'T00:00:00').toLocaleDateString('en-MY', { day: 'numeric', month: 'short' });
+  if (!d) return '—';
+  // Handle both YYYY-MM-DD and other formats
+  const dt = new Date(d.includes('T') ? d : d + 'T00:00:00');
+  if (isNaN(dt.getTime())) return d; // return raw if still invalid
+  return dt.toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' });
 }
-function escHTML(s) {
+function escH(s) {
   return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), 2800);
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2600);
 }
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
-function saveLocal() {
-  localStorage.setItem('reels_videos',   JSON.stringify(videos));
-  localStorage.setItem('reels_archived', JSON.stringify(archived));
-}
-
+// ─── INIT ─────────────────────────────────────────────────────────────────
 renderAll();
 if (SCRIPT_URL) doRefresh();
 </script>
